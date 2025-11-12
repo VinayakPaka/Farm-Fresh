@@ -1,6 +1,13 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
+import { useState } from 'react';
 
 export default function SignupScreenUI() {
+
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const  [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  // const [errors, setErrors] = useState()
   return (
     <KeyboardAvoidingView 
       style={styles.container}
