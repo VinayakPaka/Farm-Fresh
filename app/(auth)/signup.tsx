@@ -1,5 +1,6 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
+import {authApi} from '../../utils/api.js';
 
 export default function SignupScreenUI() {
 
@@ -8,6 +9,19 @@ export default function SignupScreenUI() {
   const  [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   // const [errors, setErrors] = useState()
+
+  const handleSignUp = async () => {
+    try {
+      const response = await authApi.signup(name.trim(), email.trim(), password);  
+      // if(response.success) {
+      //   console.log(response);
+      // }
+      console.log(response);
+    } catch (error) {
+      console.error("Erron in Signup")
+    }
+  }
+  
   return (
     <KeyboardAvoidingView 
       style={styles.container}
@@ -53,6 +67,10 @@ export default function SignupScreenUI() {
                   className="bg-white border border-emerald-200 rounded-2xl px-4 py-4 text-emerald-900"
                   placeholder="Your full name"
                   placeholderTextColor="#6b7280"
+                  value={name}
+                  onChangeText={(text) => {
+                    setName(text)
+                  }}
                 />
               </View>
 
@@ -67,6 +85,10 @@ export default function SignupScreenUI() {
                   placeholderTextColor="#6b7280"
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text)
+                  }}
                 />
               </View>
 
@@ -81,6 +103,11 @@ export default function SignupScreenUI() {
                   placeholderTextColor="#6b7280"
                   secureTextEntry
                   autoCapitalize="none"
+                  autoComplete='password-new'
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text)
+                  }}
                 />
               </View>
 
@@ -91,6 +118,7 @@ export default function SignupScreenUI() {
               <TouchableOpacity 
                 style={styles.signupButton} 
                 className="rounded-2xl py-4 items-center mt-4 bg-emerald-600 shadow"
+                onPress={handleSignUp}
               >
                 <Text style={styles.signupButtonText} className="text-white text-lg font-semibold">
                   Create Account
