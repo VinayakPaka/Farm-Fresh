@@ -1,0 +1,21 @@
+Steps to fix the caching issue:
+
+1. Stop your development server (Ctrl+C in the terminal)
+
+2. Clear Metro bundler cache by running ONE of these commands:
+   - npx expo start -c
+   OR
+   - npx expo start --clear
+
+3. If that doesn't work, do a full reset:
+   - Delete the .expo folder (if it exists)
+   - Run: npx expo start -c
+
+4. Make sure to reload the app on your device/emulator:
+   - Press 'r' in the terminal
+   OR
+   - Shake the device and select "Reload"
+   OR
+   - Press Ctrl+M (Android) or Cmd+D (iOS) and select "Reload"
+
+The error happens because the old bundled JavaScript is still cached and doesn't have the updated props.

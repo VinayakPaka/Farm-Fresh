@@ -58,29 +58,34 @@ export default function SignupScreenUI() {
 
         console.log('User registered:', user);
 
-        // Show alert and navigate to home
-        Alert.alert(
-          'Success!',
-          `Welcome ${user.name}! Your account has been created successfully.`,
-          [{
-            text: 'Continue',
-            onPress: () => {
-              router.replace('/(main)/home');
-            }
-          }]
-        );
+        // For mobile: Show alert
+        // For web: Success message is already shown, user can click Continue button
+        if (Platform.OS !== 'web') {
+          Alert.alert(
+            'Success!',
+            `Welcome ${user.name}! Your account has been created successfully.`,
+            [{
+              text: 'Continue',
+              onPress: () => {
+                router.replace('/(main)/home');
+              }
+            }]
+          );
+        }
       }
     } catch (error) {
       console.error("Error in Signup:", error);
       const errorMsg = error.message || 'Signup failed. Please try again.';
       setErrorMessage(errorMsg);
 
-      // Show error alert
-      Alert.alert(
-        'Signup Failed',
-        errorMsg,
-        [{ text: 'OK' }]
-      );
+      // Show error alert (only on mobile, web shows error message banner)
+      if (Platform.OS !== 'web') {
+        Alert.alert(
+          'Signup Failed',
+          errorMsg,
+          [{ text: 'OK' }]
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -123,8 +128,14 @@ export default function SignupScreenUI() {
 
             {/* Success Message */}
             {successMessage ? (
-              <View className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
-                <Text className="text-green-800 text-sm font-medium">{successMessage}</Text>
+              <View className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                <Text className="text-green-800 text-sm font-medium mb-3">{successMessage}</Text>
+                <TouchableOpacity
+                  className="bg-emerald-600 rounded-xl py-3 items-center"
+                  onPress={() => router.replace('/(main)/home')}
+                >
+                  <Text className="text-white font-semibold">Continue to Home</Text>
+                </TouchableOpacity>
               </View>
             ) : null}
 

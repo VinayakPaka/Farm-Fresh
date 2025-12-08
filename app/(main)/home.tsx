@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -31,8 +31,16 @@ const Home = () => {
     longitude: number;
     address?: string;
   }) => {
-    setLocationName(location.address || "Home");
-    await AsyncStorage.setItem("userLocation", JSON.stringify(location));
+    console.log("handleLocationSelect called with:", location);
+    const newLocationName = location.address || "Home";
+    console.log("Setting location name to:", newLocationName);
+    setLocationName(newLocationName);
+    try {
+      await AsyncStorage.setItem("userLocation", JSON.stringify(location));
+      console.log("Location saved to AsyncStorage");
+    } catch (error) {
+      console.error("Error saving location:", error);
+    }
   };
 
 
@@ -59,22 +67,21 @@ const Home = () => {
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-
-      <ScrollView>
-
+      <StatusBar barStyle="light-content" backgroundColor="#059669" />
+      <ScrollView className='flex-1'>
         <View className='bg-emerald-600 px-4 pt-2 pb-4'>
           {/* Header with location */}
           <View className="flex-row items-center justify-between mb-3">
             <View className="flex-1">
               <Text className="text-white text-xs opacity-90">Delivery to</Text>
               <View className='flex-row items-center'>
-                <Text className='text-white text-base font-bold mr-1'>Home ▼</Text>
+                <Text className='text-white text-base font-bold mr-1'>{locationName} ▼</Text>
               </View>
             </View>
             <TouchableOpacity onPress={() => setLocationPickerVisible(true)}
             >
               <Text className="text-white text-xl font-semibold">
-                📍 Change
+                📍 Changeshjc
               </Text>
             </TouchableOpacity>
           </View>
@@ -168,8 +175,12 @@ const Home = () => {
       </ScrollView>
 
       {/* Location Picker Modal */}
-      <LocationPicker visible={locationPickerVisible}/>
-    </SafeAreaView>
+      <LocationPicker 
+        visible={locationPickerVisible}
+        onClose={() => setLocationPickerVisible(false)}
+        onLocationSelect={handleLocationSelect}
+      />
+    </SafeAreaView> 
   );
 };
 
