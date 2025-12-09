@@ -4,9 +4,9 @@ import {Provider} from 'react-redux';
 import { store } from "../store/store";
 
 export default function RootLayout() {
-  return  (
+  return (
     <Provider store={store}>
-    <Stack screenOptions={{ headerShown: false }} />;
+      <Stack screenOptions={{ headerShown: false }} />
     </Provider>
   )
 }

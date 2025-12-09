@@ -14,7 +14,7 @@ const getApiBaseUrl = () => {
     } else {
         // Your computer's current IP address (found via ipconfig)
         // Make sure your mobile device is on the same WiFi network
-        return 'http://192.168.29.117:3000';
+        return 'http://10.51.4.196:3000';
     }
 };
 
@@ -88,6 +88,29 @@ export const authApi = {
     },
 
     login: async (email, password) => {
-        return apiRequest('/api/auth/signup', "POST", {email, password})
+        return apiRequest('/api/auth/login', "POST", {email, password})
     },
-} ;
+};
+
+// Products API
+export const productsApi = {
+    // Get all products with optional filters
+    getAll: async (filters = {}) => {
+        const queryParams = new URLSearchParams();
+        if (filters.q) queryParams.append('q', filters.q);
+        if (filters.category) queryParams.append('category', filters.category);
+        const queryString = queryParams.toString();
+        const endpoint = `/products${queryString ? `?${queryString}` : ''}`;
+        return apiRequest(endpoint, "GET");
+    },
+
+    // Get a single product by ID
+    getById: async (id) => {
+        return apiRequest(`/products/${id}`, "GET");
+    },
+
+    // Create a new product
+    create: async (productData) => {
+        return apiRequest('/products', "POST", productData);
+    },
+};

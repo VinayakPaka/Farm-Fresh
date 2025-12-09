@@ -1,17 +1,38 @@
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, StatusBar } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, StatusBar, ActivityIndicator, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LocationPicker from "../../components/LocationPicker";
+import { productsApi } from "../../utils/api";
+import { useDispatch } from 'react-redux';
+import { addToCart } from '@/store/cartSlice';
+
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  imageUrl?: string;
+  category?: string;
+  description?: string;
+  stock: number;
+  createdAt?: string;
+}
 
 const Home = () => {
   const router = useRouter();
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
   const [locationName, setLocationName] = useState("Home");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  //intilize dispatch
+  const dispatch = useDispatch();
 
   useEffect(() => {
     loadSavedLocation();
+    fetchProducts();
   }, []);
 
   const loadSavedLocation = async () => {
@@ -43,6 +64,21 @@ const Home = () => {
     }
   };
 
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await productsApi.getAll();
+      setProducts(data);
+      console.log('✅ Fetched products:', data.length);
+    } catch (err) {
+      console.error('❌ Error fetching products:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load products';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     { id: 1, name: "Fruits", icon: "🍎", color: "bg-red-100" },
@@ -53,17 +89,6 @@ const Home = () => {
     { id: 6, name: "Snacks", icon: "🥛", color: "bg-blue-100" },
   ];
 
-  const products = [
-    {
-      id: 1,
-      name: "Tomatoes",
-      price: "₹49",
-      image: "🍅",
-      category: "Vegetables",
-    },
-    { id: 2, name: "Bananas", price: "₹39", image: "🍌", category: "Fruits" },
-    { id: 3, name: "Milk", price: "₹65", image: "🥛", category: "Dairy" },
-  ];
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -139,38 +164,80 @@ const Home = () => {
 
 
         {/* Products */}
-
-        <View>
-          <Text>Deals of for Today</Text>
-          <FlatList data={products} horizontal renderItem={({ item }) => (
-            <View
-              className="bg-white rounded-xl p-3 mr-3 shadow-sm border border-gray-100"
-              style={{ width: 150 }}
-            >
-              <View className="w-full h-24 bg-gray-50 rounded-lg items-center justify-center mb-2">
-                <Text className="text-5xl">{item.image}</Text>
-              </View>
-
-              <Text
-                className="text-sm font-semibold text-gray-800"
-                numberOfLines={1}
-              >
-                {item.name}
-              </Text>
-              <Text className="text-xs text-gray-500">{item.category}</Text>
-
-              <View className="flex-row items-center justify-between mt-2">
-                <Text className="text-lg font-bold text-emerald-600">
-                  {item.price}
-                </Text>
-                <TouchableOpacity className="bg-emerald-600 px-3 py-1 rounded-lg">
-                  <Text className="text-white text-xs font-semibold">
-                    Add
-                  </Text>
-                </TouchableOpacity>
-              </View>
+        <View className="px-4 py-4">
+          <Text className="text-lg font-bold text-gray-800 mb-3">Deals for Today</Text>
+          
+          {loading ? (
+            <View className="flex-1 items-center justify-center py-8">
+              <ActivityIndicator size="large" color="#059669" />
+              <Text className="text-gray-500 mt-2">Loading products...</Text>
             </View>
-          )} showsHorizontalScrollIndicator={false}/>
+          ) : error ? (
+            <View className="flex-1 items-center justify-center py-8 bg-red-50 rounded-lg">
+              <Text className="text-red-600 font-semibold">⚠️ Error</Text>
+              <Text className="text-red-500 text-sm mt-1">{error}</Text>
+              <TouchableOpacity 
+                onPress={fetchProducts}
+                className="bg-red-600 px-4 py-2 rounded-lg mt-3"
+              >
+                <Text className="text-white font-semibold">Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : products.length === 0 ? (
+            <View className="flex-1 items-center justify-center py-8">
+              <Text className="text-gray-500">No products available</Text>
+            </View>
+          ) : (
+            <FlatList 
+              data={products} 
+              horizontal 
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <View
+                  className="bg-white rounded-xl p-3 mr-3 shadow-sm border border-gray-100"
+                  style={{ width: 150 }}
+                >
+                  <View className="w-full h-24 bg-gray-50 rounded-lg overflow-hidden mb-2">
+                    <Image 
+                      source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }}
+                      style={{ width: '100%', height: '100%' }}
+                      resizeMode="cover"
+                    />
+                  </View>
+
+                  <Text
+                    className="text-sm font-semibold text-gray-800"
+                    numberOfLines={1}
+                  >
+                    {item.name}
+                  </Text>
+                  <Text className="text-xs text-gray-500">{item.category}</Text>
+                  <Text className="text-xs text-gray-400">Stock: {item.stock}</Text>
+
+                  <View className="flex-row items-center justify-between mt-2">
+                    <Text className="text-lg font-bold text-emerald-600">
+                      ₹{item.price}
+                    </Text>
+                    <TouchableOpacity className="bg-emerald-600 px-3 py-1 rounded-lg" onPress={() => {
+                      dispatch(addToCart({
+                        id: item._id,
+                        name: item.name,
+                        imageUrl: item.imageUrl,
+                        category: item.category,
+                        price: item.price,
+                        quantity: 1,
+                      }))
+                    }}>
+                      <Text className="text-white text-xs font-semibold">
+                        Add
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )} 
+              showsHorizontalScrollIndicator={false}
+            />
+          )}
         </View>
       </ScrollView>
 
