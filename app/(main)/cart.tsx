@@ -1,6 +1,7 @@
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux' 
+import { useRouter } from 'expo-router';
 import { addToCart, clearCart, removeFromCart } from '@/store/cartSlice';
 
 const cart = () => {
@@ -8,6 +9,7 @@ const cart = () => {
   const cartItems = useSelector((state:any) => state.cart.items)
   // console.log(cartItems)
   const dispatch = useDispatch();
+  const router = useRouter();
 
   const calculateTotal = () => {
     return cartItems.reduce((total: number, item: any) => {
@@ -98,7 +100,11 @@ const cart = () => {
             <Text className="text-2xl font-bold text-emerald-600">₹ {calculateTotal()}</Text>
           </View>
           
-          <TouchableOpacity className="bg-emerald-600 rounded-xl py-4 items-center">
+          <TouchableOpacity 
+            className="bg-emerald-600 rounded-xl py-4 items-center"
+            onPress={() => router.push('/(main)/checkout')}
+            disabled={cartItems.length === 0}
+          >
             <Text className="text-white text-lg font-semibold">Proceed to Checkout</Text>
           </TouchableOpacity>
         </View>

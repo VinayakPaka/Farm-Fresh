@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./config/dbConfig.js";
 import authRoutes from "./routes/auth.routes.js";
 import productsRouter from './routes/product.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 dotenv.config();
 connectDB();
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth/", authRoutes);
 app.use('/products', productsRouter);
+app.use('/api/payments', paymentRoutes);
 
 const PORT = process.env.PORT || 3000;
 

@@ -3,6 +3,8 @@
 # dependencies
 node_modules/
 .claude
+STRIPE_SETUP.md
+STRIPE_FIX_SUMMARY.md
 
 
 # Expo
